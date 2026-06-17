@@ -2,8 +2,9 @@
   "name": "brick-lang",
   "displayName": "Brick Language",
   "description": "Syntax highlighting, linting, and snippets for the .brick DSL",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "publisher": "intragrid",
+  "icon": "icons/icon.png",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -32,7 +33,11 @@
         "extensions": [
           ".brick"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/brick-file.svg",
+          "dark": "./icons/brick-file.svg"
+        }
       }
     ],
     "grammars": [
@@ -57,6 +62,14 @@
       {
         "command": "brick.lint",
         "title": "Brick: Lint"
+      },
+      {
+        "command": "brick.signIn",
+        "title": "Brick: Sign In"
+      },
+      {
+        "command": "brick.signOut",
+        "title": "Brick: Sign Out"
       }
     ],
     "menus": {
@@ -78,7 +91,8 @@
     "package": "npm run bundle && npx @vscode/vsce package --no-dependencies --allow-missing-repository"
   },
   "dependencies": {
-    "@brick/core": "*"
+    "@brick/core": "*",
+    "@supabase/supabase-js": "^2.49.4"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

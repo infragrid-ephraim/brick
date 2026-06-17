@@ -84,11 +84,19 @@
     },
 
     "stmt_navigate": {
-      "match": "\\b(go)\\s+(to)\\b",
-      "captures": {
-        "1": { "name": "keyword.control.brick" },
-        "2": { "name": "keyword.control.brick" }
-      }
+      "patterns": [
+        {
+          "match": "\\b(navigate)\\b",
+          "captures": { "1": { "name": "keyword.control.brick" } }
+        },
+        {
+          "match": "\\b(go)\\s+(to)\\b",
+          "captures": {
+            "1": { "name": "keyword.control.brick" },
+            "2": { "name": "keyword.control.brick" }
+          }
+        }
+      ]
     },
 
     "stmt_click": {

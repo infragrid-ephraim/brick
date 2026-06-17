@@ -21,9 +21,16 @@ BrickFile
   { return { kind: "brick_file", declarations: decls }; }
 
 TopLevel
-  = TypeDef
+  = ModuleDecl
+  / TypeDef
   / FunctionDef
   / TopLevelVar
+
+// ── Module declaration ────────────────────────────────────────────────────────
+
+ModuleDecl
+  = "module" _ name:Identifier _
+  { return { kind: "module_decl", name, location: loc() }; }
 
 // ── Type definitions ──────────────────────────────────────────────────────────
 
@@ -87,9 +94,11 @@ Stmt
   / ReportStmt
   / ReturnStmt
 
-// go to <url>
+// navigate <url>  (also accepts legacy: go to <url>)
 NavigateStmt
-  = "go" _ "to" _ url:Expr _
+  = "navigate" _ url:Expr _
+  { return { kind: "navigate", url, location: loc() }; }
+  / "go" _ "to" _ url:Expr _
   { return { kind: "navigate", url, location: loc() }; }
 
 // click <selector> [as "Label"]
@@ -122,8 +131,8 @@ BareKey
 
 // wait <n><unit>
 WaitStmt
-  = "wait" _ n:Number unit:TimeUnit _
-  { return { kind: "wait", ms: parseDuration(n, unit), location: loc() }; }
+  = "wait" _ n:Number unit:TimeUnit? _
+  { return { kind: "wait", ms: parseDuration(n, unit ?? "ms"), location: loc() }; }
 
 TimeUnit
   = "ms" / "s" / "m"
