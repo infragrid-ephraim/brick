@@ -198,14 +198,37 @@ UsingClause = "using" _ m:StringLit { return m; }
 
 // gen "prompt" [as Type] [using "model"] -> @var
 GenStmt
-  = "gen" _ prompt:StringLit _ as_:AsClause? _ m:UsingClause? _ "->" _ "@" variable:Identifier _
+  // Function-call style: gen("prompt", Type[], "model") -> @var  (model optional)
+  = "gen" _ "(" _ prompt:StringLit _ "," _ as_:TypeAnnotation _ "," _ m:StringLit _ ")" _ "->" _ "@" variable:Identifier _
+  { return { kind: "gen", prompt, outputType: as_, model: m, variable, location: loc() }; }
+  / "gen" _ "(" _ prompt:StringLit _ "," _ as_:TypeAnnotation _ ")" _ "->" _ "@" variable:Identifier _
+  { return { kind: "gen", prompt, outputType: as_, model: undefined, variable, location: loc() }; }
+  / "gen" _ "(" _ prompt:StringLit _ ")" _ "->" _ "@" variable:Identifier _
+  { return { kind: "gen", prompt, outputType: undefined, model: undefined, variable, location: loc() }; }
+  / "gen" _ "(" _ prompt:StringLit _ "," _ as_:TypeAnnotation _ "," _ m:StringLit _ ")" _
+  { return { kind: "gen", prompt, outputType: as_, model: m, variable: undefined, location: loc() }; }
+  / "gen" _ "(" _ prompt:StringLit _ "," _ as_:TypeAnnotation _ ")" _
+  { return { kind: "gen", prompt, outputType: as_, model: undefined, variable: undefined, location: loc() }; }
+  / "gen" _ "(" _ prompt:StringLit _ ")" _
+  { return { kind: "gen", prompt, outputType: undefined, model: undefined, variable: undefined, location: loc() }; }
+  // Legacy keyword style: gen "prompt" as Type using "model" -> @var
+  / "gen" _ prompt:StringLit _ as_:AsClause? _ m:UsingClause? _ "->" _ "@" variable:Identifier _
   { return { kind: "gen", prompt, outputType: as_ || undefined, model: m || undefined, variable, location: loc() }; }
   / "gen" _ prompt:StringLit _ as_:AsClause? _ m:UsingClause? _
   { return { kind: "gen", prompt, outputType: as_ || undefined, model: m || undefined, variable: undefined, location: loc() }; }
 
-// gen_code "prompt" [as Type] [using "model"] -> @var
+// gen_code("prompt", Type, "model") -> @var  or  gen_code "prompt" as Type -> @var
 GenCodeStmt
-  = "gen_code" _ prompt:StringLit _ as_:AsClause? _ m:UsingClause? _ "->" _ "@" variable:Identifier _
+  = "gen_code" _ "(" _ prompt:StringLit _ "," _ as_:TypeAnnotation _ "," _ m:StringLit _ ")" _ "->" _ "@" variable:Identifier _
+  { return { kind: "gen_code", prompt, outputType: as_, model: m, variable, location: loc() }; }
+  / "gen_code" _ "(" _ prompt:StringLit _ "," _ as_:TypeAnnotation _ ")" _ "->" _ "@" variable:Identifier _
+  { return { kind: "gen_code", prompt, outputType: as_, model: undefined, variable, location: loc() }; }
+  / "gen_code" _ "(" _ prompt:StringLit _ ")" _ "->" _ "@" variable:Identifier _
+  { return { kind: "gen_code", prompt, outputType: undefined, model: undefined, variable, location: loc() }; }
+  / "gen_code" _ "(" _ prompt:StringLit _ ")" _
+  { return { kind: "gen_code", prompt, outputType: undefined, model: undefined, variable: undefined, location: loc() }; }
+  // Legacy keyword style
+  / "gen_code" _ prompt:StringLit _ as_:AsClause? _ m:UsingClause? _ "->" _ "@" variable:Identifier _
   { return { kind: "gen_code", prompt, outputType: as_ || undefined, model: m || undefined, variable, location: loc() }; }
   / "gen_code" _ prompt:StringLit _ as_:AsClause? _ m:UsingClause? _
   { return { kind: "gen_code", prompt, outputType: as_ || undefined, model: m || undefined, variable: undefined, location: loc() }; }
