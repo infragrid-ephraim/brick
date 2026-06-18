@@ -152,6 +152,22 @@ function requireAuth(): boolean {
 // ─── Primitive hover documentation ───────────────────────────────────────────
 
 const PRIMITIVE_DOCS: Record<string, string> = {
+  import: [
+    "**`import`** — Import types and functions from another `.brick` file",
+    "```brick",
+    "// src/main.brick",
+    "import \"./types.brick\"",
+    "import \"./helpers.brick\"",
+    "",
+    "main() {",
+    "  read_file \"/path/to/doc.pdf\" -> @text",
+    "  processDoc(@text) -> @result   // function from helpers.brick",
+    "  return @result",
+    "}",
+    "```",
+    "Paths are relative to the current file. Types and functions from the imported file are available in the importing file.",
+  ].join("\n"),
+
   module: [
     "**`module`** — Declare the module name",
     "```brick",
@@ -316,10 +332,28 @@ const PRIMITIVE_DOCS: Record<string, string> = {
   read_pdf: [
     "**`read_pdf`** — Extract text from a PDF",
     "```brick",
+    "// URL",
     "read_pdf \"https://example.com/report.pdf\" -> @text",
+    "// Local file (macOS path)",
+    "read_pdf \"/Users/you/Downloads/report.pdf\" -> @text",
     "read_pdf @pdfUrl -> @text",
     "```",
-    "Fetches a PDF (URL or data: URI) and extracts its text. Falls back to OCR for scanned PDFs.",
+    "Supports URLs, local filesystem paths, and `data:` URIs. Falls back to OCR for scanned PDFs.",
+  ].join("\n"),
+
+  read_pdf_pages: [
+    "**`read_pdf_pages`** — Extract PDF text as an array of pages",
+    "```brick",
+    "read_pdf_pages \"/Users/you/Downloads/report.pdf\" -> @pages",
+    "read_pdf_pages @pdfUrl -> @pages",
+    "",
+    "// Then process each page",
+    "for @page in @pages {",
+    "  gen \"Summarize: @page\" as Summary -> @summary",
+    "  log @summary.text",
+    "}",
+    "```",
+    "Returns `String[]` — one entry per page. Useful for chunking large PDFs.",
   ].join("\n"),
 
   ocr: [
@@ -334,10 +368,14 @@ const PRIMITIVE_DOCS: Record<string, string> = {
   read_file: [
     "**`read_file`** — Read and extract text from any file",
     "```brick",
+    "// Local file from Finder",
+    "read_file \"/Users/you/Downloads/TRC AI Playbook.docx\" -> @text",
+    "// URL",
     "read_file \"https://example.com/doc.docx\" -> @text",
+    "// Hint the file type when the URL has no extension",
     "read_file @fileUrl as \"report.xlsx\" -> @text",
     "```",
-    "Supports: PDF, DOCX, XLSX, PPTX, CSV, TXT, images.  \nUse **`as \"filename.ext\"`** to hint the file type when the URL has no extension.",
+    "Supports local paths (`/Users/...`), URLs, and `data:` URIs.  \nFormats: PDF · DOCX · XLSX · PPTX · CSV · TXT · images",
   ].join("\n"),
 
   read_gdoc: [

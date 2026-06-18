@@ -94,6 +94,7 @@
         { "include": "#stmt_ai" },
         { "include": "#stmt_extract" },
         { "include": "#stmt_gen" },
+        { "include": "#stmt_import" },
         { "include": "#stmt_read" },
         { "include": "#stmt_cookies" },
         { "include": "#stmt_save" },
@@ -284,8 +285,13 @@
     },
 
     "stmt_read": {
-      "match": "\\b(read_pdf|read_file|read_gdoc|ocr)\\b",
+      "match": "\\b(read_pdf_pages|read_pdf|read_file|read_gdoc|ocr)\\b",
       "captures": { "1": { "name": "keyword.control.brick" } }
+    },
+
+    "stmt_import": {
+      "match": "\\b(import)\\b",
+      "captures": { "1": { "name": "keyword.control.import.brick" } }
     },
 
     "stmt_cookies": {

@@ -32,7 +32,22 @@ export function parse(source: string): ParseResult {
 // Convenience: parse + compile in one call
 import { compile } from "./compiler";
 import { lint } from "./linter";
-import type { BrickFile } from "./ast";
+import type { BrickFile, TopLevel } from "./ast";
+
+export function buildFromAst(ast: BrickFile): {
+  steps: import("./compiler").RunbookStep[];
+  diagnostics: import("./linter").Diagnostic[];
+} {
+  const lintDiags = lint(ast);
+  const { steps, errors } = compile(ast);
+  const compileDiags: import("./linter").Diagnostic[] = errors.map(e => ({
+    severity: "error" as const,
+    message: e.message,
+    line: e.line,
+    column: e.column,
+  }));
+  return { steps, diagnostics: [...lintDiags, ...compileDiags] };
+}
 
 export function buildFromSource(source: string): {
   steps: import("./compiler").RunbookStep[];

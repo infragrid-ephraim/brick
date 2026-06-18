@@ -2,7 +2,8 @@
 import { program } from "commander";
 import * as fs from "fs";
 import * as path from "path";
-import { buildFromSource, serialize } from "@brick/core";
+import { parse, buildFromAst, buildFromSource, serialize } from "@brick/core";
+import type { BrickFile, TopLevel } from "@brick/core";
 
 // ANSI helpers
 const c = {
@@ -57,6 +58,45 @@ function loadAndParse(file: string) {
   return { source, absPath };
 }
 
+// ── Import resolution ─────────────────────────────────────────────────────────
+
+function resolveImports(entryPath: string): BrickFile {
+  const visited = new Set<string>();
+
+  function loadFile(absPath: string): TopLevel[] {
+    if (visited.has(absPath)) return [];
+    visited.add(absPath);
+
+    if (!fs.existsSync(absPath)) {
+      console.error(c.red(`  ✕  Import not found: ${absPath}`));
+      return [];
+    }
+
+    const src = fs.readFileSync(absPath, "utf8");
+    const result = parse(src);
+    if (!result.ok) {
+      console.error(c.red(`  ✕  Parse error in ${absPath}: ${result.error}`));
+      return [];
+    }
+
+    const decls: TopLevel[] = [];
+    const dir = path.dirname(absPath);
+
+    for (const decl of result.ast.declarations) {
+      if (decl.kind === "import") {
+        const importedPath = path.resolve(dir, decl.path);
+        decls.push(...loadFile(importedPath));
+      } else {
+        decls.push(decl);
+      }
+    }
+    return decls;
+  }
+
+  const declarations = loadFile(path.resolve(entryPath));
+  return { kind: "brick_file", declarations };
+}
+
 // ── brick build ───────────────────────────────────────────────────────────────
 
 program
@@ -65,10 +105,11 @@ program
   .option("-o, --out <path>", "Output path for the JSON file")
   .option("--pretty", "Pretty-print the JSON output", true)
   .action((file: string | undefined, opts: { out?: string; pretty: boolean }) => {
-    const { source, absPath } = loadAndParse(resolveFile(file));
+    const { absPath } = loadAndParse(resolveFile(file));
     const meta = readBrickJson();
     const relSrc = path.relative(process.cwd(), absPath);
-    const { steps, diagnostics } = buildFromSource(source);
+    const mergedAst = resolveImports(absPath);
+    const { steps, diagnostics } = buildFromAst(mergedAst);
 
     const errors = diagnostics.filter(d => d.severity === "error");
     const warnings = diagnostics.filter(d => d.severity === "warning");

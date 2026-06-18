@@ -131,7 +131,9 @@ export type SetCookiesStmt  = { kind: "set_cookies";  cookies: Expr; location?: 
 export type LoadExcelAllStmt = { kind: "load_excel_all"; source: Expr; variable: string; location?: Location };
 
 // read_pdf "url" -> @text
-export type ReadPdfStmt   = { kind: "read_pdf";   source: Expr; variable: string; location?: Location };
+export type ReadPdfStmt      = { kind: "read_pdf";       source: Expr; variable: string; location?: Location };
+// read_pdf_pages "url" -> @pages  (returns String[])
+export type ReadPdfPagesStmt = { kind: "read_pdf_pages"; source: Expr; variable: string; location?: Location };
 // ocr "url" -> @text
 export type OcrImageStmt  = { kind: "ocr_image";  source: Expr; variable: string; location?: Location };
 // read_file "url" [as "filename"] -> @text
@@ -176,6 +178,7 @@ export type Stmt =
   | SetCookiesStmt
   | LoadExcelAllStmt
   | ReadPdfStmt
+  | ReadPdfPagesStmt
   | OcrImageStmt
   | ReadFileStmt
   | ReadGdocStmt
@@ -204,7 +207,12 @@ export type FunctionDef = {
   location?: Location;
 };
 
-export type TopLevel = TypeDef | EnumTypeDef | TopLevelVar | FunctionDef;
+// import "path.brick"
+export type ImportDecl = { kind: "import"; path: string; location?: Location };
+// module Name
+export type ModuleDecl = { kind: "module_decl"; name: string; location?: Location };
+
+export type TopLevel = ModuleDecl | ImportDecl | TypeDef | EnumTypeDef | TopLevelVar | FunctionDef;
 
 // ── Root ─────────────────────────────────────────────────────────────────────
 

@@ -38,6 +38,7 @@ export type RunbookStep =
   | { type: "set_cookies";     cookies: string }
   | { type: "excel_to_csvs";   source: string; variable: string }
   | { type: "read_pdf";        source: string; variable: string }
+  | { type: "read_pdf_pages";  source: string; variable: string }
   | { type: "ocr_image";       source: string; variable: string }
   | { type: "read_file";       source: string; filename?: string; variable: string }
   | { type: "read_gdoc";       url: string; variable: string };
@@ -202,6 +203,9 @@ function compileStmt(stmt: Stmt, errors: CompileError[], typeDefs: TypeDefMap = 
 
     case "read_pdf":
       return { type: "read_pdf", source: resolveExpr(stmt.source), variable: stmt.variable };
+
+    case "read_pdf_pages":
+      return { type: "read_pdf_pages", source: resolveExpr(stmt.source), variable: stmt.variable };
 
     case "ocr_image":
       return { type: "ocr_image", source: resolveExpr(stmt.source), variable: stmt.variable };

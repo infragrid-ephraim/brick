@@ -22,6 +22,7 @@ BrickFile
 
 TopLevel
   = ModuleDecl
+  / ImportDecl
   / TypeDef
   / FunctionDef
   / TopLevelVar
@@ -31,6 +32,12 @@ TopLevel
 ModuleDecl
   = "module" _ name:Identifier _
   { return { kind: "module_decl", name, location: loc() }; }
+
+// ── Import declaration ────────────────────────────────────────────────────────
+
+ImportDecl
+  = "import" _ path:StringLit _
+  { return { kind: "import", path, location: loc() }; }
 
 // ── Type definitions ──────────────────────────────────────────────────────────
 
@@ -99,6 +106,7 @@ Stmt
   / GenStmt
   / SetCookiesStmt
   / LoadExcelAllStmt
+  / ReadPdfPagesStmt
   / ReadPdfStmt
   / OcrStmt
   / ReadFileStmt
@@ -211,6 +219,11 @@ SetCookiesStmt
 LoadExcelAllStmt
   = "load_excel_all" _ source:Expr _ "->" _ "@" variable:Identifier _
   { return { kind: "load_excel_all", source, variable, location: loc() }; }
+
+// read_pdf_pages "url_or_@var" -> @pages  (returns String[])
+ReadPdfPagesStmt
+  = "read_pdf_pages" _ source:Expr _ "->" _ "@" variable:Identifier _
+  { return { kind: "read_pdf_pages", source, variable, location: loc() }; }
 
 // read_pdf "url_or_@var" -> @text
 ReadPdfStmt
