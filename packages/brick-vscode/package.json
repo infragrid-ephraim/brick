@@ -3,13 +3,13 @@
   "displayName": "Brick Language",
   "description": "Syntax highlighting, linting, and snippets for the .brick DSL",
   "version": "0.3.0",
-  "publisher": "intragrid",
+  "publisher": "Infragrid",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/infragrid-ephraim/brick.git"
+    "url": "https://github.com/Infragrid-AI/brick.git"
   },
-  "homepage": "https://github.com/infragrid-ephraim/brick#readme",
+  "homepage": "https://github.com/Infragrid-AI/brick#readme",
   "icon": "icons/icon.png",
   "engines": {
     "vscode": "^1.85.0"
