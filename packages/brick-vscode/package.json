@@ -1,7 +1,7 @@
 {
   "name": "brick-lang",
   "displayName": "Brick Language",
-  "description": "Syntax highlighting, linting, and snippets for the .brick DSL",
+  "description": "Internal language tooling.",
   "version": "0.3.0",
   "publisher": "Infragrid",
   "license": "MIT",
@@ -15,16 +15,9 @@
     "vscode": "^1.85.0"
   },
   "categories": [
-    "Programming Languages",
-    "Linters",
-    "Snippets"
+    "Other"
   ],
-  "keywords": [
-    "brick",
-    "dsl",
-    "automation",
-    "intragrid"
-  ],
+  "keywords": [],
   "activationEvents": [
     "onLanguage:brick"
   ],
