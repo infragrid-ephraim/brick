@@ -21,6 +21,8 @@ if (fs.existsSync(grammarPath)) {
 // ─── Auth state ──────────────────────────────────────────────────────────────
 
 const SESSION_KEY = "brick-session";
+let lastSignInAttemptMs = 0;
+const SIGN_IN_COOLDOWN_MS = 5000;
 
 let currentSession: BrickSession | null = null;
 let diagnosticCollection: vscode.DiagnosticCollection;
@@ -630,6 +632,17 @@ export function activate(context: vscode.ExtensionContext): void {
 
       if (!email) return;
 
+      const now = Date.now();
+      const elapsed = now - lastSignInAttemptMs;
+      if (elapsed < SIGN_IN_COOLDOWN_MS) {
+        const wait = Math.ceil((SIGN_IN_COOLDOWN_MS - elapsed) / 1000);
+        vscode.window.showWarningMessage(
+          `Brick: Please wait ${wait}s before requesting another sign-in email.`
+        );
+        return;
+      }
+      lastSignInAttemptMs = now;
+
       try {
         await signInWithEmail(email);
         vscode.window.showInformationMessage(
@@ -712,6 +725,37 @@ export function activate(context: vscode.ExtensionContext): void {
         if (!docText) return undefined;
         return new vscode.Hover(new vscode.MarkdownString(docText), wordRange);
       },
+    })
+  );
+
+  // ── brick.installCursorRules ────────────────────────────────────────────────
+  context.subscriptions.push(
+    vscode.commands.registerCommand("brick.installCursorRules", async () => {
+      const folders = vscode.workspace.workspaceFolders;
+      if (!folders || folders.length === 0) {
+        vscode.window.showWarningMessage("Brick: Open a workspace folder first.");
+        return;
+      }
+      const root = folders[0].uri.fsPath;
+      const rulesDir = path.join(root, ".cursor", "rules");
+      const rulesFile = path.join(rulesDir, "brick.mdc");
+      try {
+        fs.mkdirSync(rulesDir, { recursive: true });
+        const srcRules = path.join(__dirname, "brick.mdc");
+        const content = fs.existsSync(srcRules)
+          ? fs.readFileSync(srcRules, "utf8")
+          : "# Brick DSL rules could not be found. Re-install the extension.";
+        fs.writeFileSync(rulesFile, content, "utf8");
+        const open = await vscode.window.showInformationMessage(
+          "Brick: Cursor rules installed at .cursor/rules/brick.mdc",
+          "Open file"
+        );
+        if (open === "Open file") {
+          vscode.window.showTextDocument(vscode.Uri.file(rulesFile));
+        }
+      } catch (e) {
+        vscode.window.showErrorMessage(`Brick: Failed to install Cursor rules — ${e}`);
+      }
     })
   );
 

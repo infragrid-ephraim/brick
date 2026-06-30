@@ -22,7 +22,7 @@ export function lint(ast: BrickFile): Diagnostic[] {
   // Check for entry function
   const functions = ast.declarations.filter((d): d is FunctionDef => d.kind === "function_def");
   if (functions.length === 0) {
-    diags.push({ severity: "error", message: "No function defined. Add a function like: main() { ... }" });
+    diags.push({ severity: "error", message: "No function defined. Add a function like: fn main() { ... }" });
     return diags;
   }
 

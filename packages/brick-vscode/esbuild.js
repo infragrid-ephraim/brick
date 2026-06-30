@@ -14,6 +14,16 @@ function copyGrammar() {
   console.log("Copied grammar.js →", dest);
 }
 
+/** Copy brick.mdc Cursor rules into out/ so the installCursorRules command can read it */
+function copyCursorRules() {
+  const src = path.join(__dirname, "..", "..", ".cursor", "rules", "brick.mdc");
+  const dest = path.join(__dirname, "out", "brick.mdc");
+  if (fs.existsSync(src)) {
+    fs.copyFileSync(src, dest);
+    console.log("Copied brick.mdc →", dest);
+  }
+}
+
 const ctx = esbuild.context({
   entryPoints: ["src/extension.ts"],
   bundle: true,
@@ -32,6 +42,7 @@ const ctx = esbuild.context({
 
 ctx.then(async (c) => {
   copyGrammar();
+  copyCursorRules();
   if (watch) {
     await c.watch();
     console.log("Watching…");

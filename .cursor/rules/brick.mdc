@@ -1,0 +1,253 @@
+---
+description: Brick DSL — browser automation language that compiles to Infragrid runbook steps
+globs: ["**/*.brick"]
+alwaysApply: true
+---
+
+# Brick DSL
+
+Brick is a typed, English-like language for browser automation. Files have the extension `.brick` and compile to `RunbookStep[]` via `brick build`.
+
+## File structure
+
+```brick
+module MyModule
+
+fn main() -> string {
+  // statements
+}
+```
+
+- Every function **must** start with the `fn` keyword
+- The first function in the file is the entry point
+- `module` declaration is optional but recommended
+
+## Types
+
+```brick
+type Customer = {
+  name: String
+  email: String
+  score: Number
+}
+
+type Status = "active" | "inactive" | "pending"
+```
+
+## Functions
+
+```brick
+fn main() -> string {
+  // body
+}
+
+fn processRow(row: Customer) -> string {
+  return @row.name
+}
+```
+
+## Statements
+
+### Navigation
+```brick
+navigate "https://example.com"
+go to "https://example.com"
+```
+
+### Clicking
+```brick
+click "#submit-btn"
+click "Submit" as "Submit button"
+click "[data-testid='login']"
+```
+
+### Form input
+```brick
+fill "Email" with "user@example.com"
+fill "Email" with @email
+type "#input" with "text"
+select "#dropdown" to "Option A"
+```
+
+### Keyboard
+```brick
+press Enter
+press Tab
+press "Escape"
+```
+
+### Waiting
+```brick
+wait 1s
+wait 500ms
+wait 2m
+```
+
+### Scrolling
+```brick
+scroll ".container" by 300
+```
+
+### Screenshots
+```brick
+screenshot -> @snap
+```
+
+### Variables
+```brick
+"hello world" -> @greeting
+@count = 0
+@count += 1
+```
+
+### Control flow
+```brick
+if @count > 5 {
+  log "done"
+} else {
+  log "continue"
+}
+
+while @running == true {
+  click "Next"
+  wait 1s
+}
+
+for @row in @rows {
+  navigate @row.url
+}
+
+repeat 3 {
+  click "Retry"
+  wait 2s
+}
+```
+
+### JavaScript
+```brick
+js {
+  return document.title;
+} -> @title
+
+js {
+  return document.querySelector('.price').innerText;
+} -> @price
+```
+
+### Python (with Playwright access)
+```brick
+python {
+  result = await page.title()
+} -> @title
+
+python {
+  # `variables` dict holds all @vars
+  name = variables.get('name', '')
+  result = name.upper()
+} -> @upper_name
+```
+
+### AI generation
+```brick
+gen "Summarise this text: @content" -> @summary
+gen "Extract the price from: @page_text" as Number -> @price
+gen "Classify this email" using "gpt-4o" -> @classification
+
+// Pass a variable as the full prompt
+gen @my_prompt -> @result
+```
+
+### AI action
+```brick
+ai "Click the most prominent call-to-action button" -> @result
+```
+
+### Extraction
+```brick
+extract table "Product listings" -> @products
+extract from @html "the total price" -> @total
+```
+
+### File operations
+```brick
+open_file "/path/to/file.pdf" -> @text
+read_pdf "/path/to/file.pdf" -> @text
+read_gdoc "https://docs.google.com/..." -> @text
+load excel @file_path sheet "Sheet1" -> @data
+load_sheet "My Sheet" -> @rows
+```
+
+### Import
+```brick
+import "src/helpers.brick"
+```
+
+### Logging / errors
+```brick
+log "Processing row @index"
+fail "Could not find element"
+```
+
+### Return
+```brick
+return @result
+```
+
+## Variable interpolation
+
+Use `@varname` anywhere a string is expected — in `navigate`, `gen`, `log`, and most statement arguments:
+
+```brick
+navigate @url
+log "Found @count results for @query"
+gen "Summarise: @content" -> @summary
+```
+
+## Common patterns
+
+### Scrape and summarise
+```brick
+fn main() -> string {
+  navigate "https://example.com/report"
+  js {
+    return document.body.innerText;
+  } -> @body
+  gen "Summarise this report in 3 bullet points:\n@body" -> @summary
+  return @summary
+}
+```
+
+### Loop through rows
+```brick
+fn main() -> string {
+  load_sheet "Prospects" -> @rows
+  for @row in @rows {
+    navigate @row.url
+    screenshot -> @snap
+    ai "Fill in the contact form with name '@row.name' and email '@row.email'"
+    wait 1s
+  }
+  return "Done"
+}
+```
+
+### Conditional branching
+```brick
+fn main() -> string {
+  navigate "https://app.example.com/status"
+  js { return document.querySelector('.status').innerText; } -> @status
+  if @status == "error" {
+    screenshot -> @snap
+    return "Error detected"
+  }
+  return "OK"
+}
+```
+
+## Build & run
+
+```bash
+brick build          # compile src/main.brick → src/main.json
+brick run            # run the compiled runbook
+brick watch          # watch + rebuild on change
+```

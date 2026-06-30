@@ -219,6 +219,11 @@ GenStmt
   { return { kind: "gen", prompt, outputType: as_, model: undefined, variable: undefined, location: loc() }; }
   / "gen" _ "(" _ prompt:StringLit _ ")" _
   { return { kind: "gen", prompt, outputType: undefined, model: undefined, variable: undefined, location: loc() }; }
+  // Variable prompt: gen @var as Type using "model" -> @result
+  / "gen" _ "@" name:Identifier _ as_:AsClause? _ m:UsingClause? _ "->" _ "@" variable:Identifier _
+  { return { kind: "gen", prompt: "@" + name, outputType: as_ || undefined, model: m || undefined, variable, location: loc() }; }
+  / "gen" _ "@" name:Identifier _ as_:AsClause? _ m:UsingClause? _
+  { return { kind: "gen", prompt: "@" + name, outputType: as_ || undefined, model: m || undefined, variable: undefined, location: loc() }; }
   // Legacy keyword style: gen "prompt" as Type using "model" -> @var
   / "gen" _ prompt:StringLit _ as_:AsClause? _ m:UsingClause? _ "->" _ "@" variable:Identifier _
   { return { kind: "gen", prompt, outputType: as_ || undefined, model: m || undefined, variable, location: loc() }; }

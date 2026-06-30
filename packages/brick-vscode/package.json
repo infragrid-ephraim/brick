@@ -1,8 +1,8 @@
 {
   "name": "brick-lang",
-  "displayName": "Brick",
+  "displayName": "Brick Language",
   "description": "Internal language tooling.",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "publisher": "Infragrid",
   "license": "MIT",
   "repository": {
@@ -74,6 +74,10 @@
       {
         "command": "brick.signOut",
         "title": "Brick: Sign Out"
+      },
+      {
+        "command": "brick.installCursorRules",
+        "title": "Brick: Install Cursor Rules"
       }
     ],
     "menus": {
